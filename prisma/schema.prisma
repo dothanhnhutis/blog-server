@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @default(uuid())
+  email          String          @unique
+  password       String?
+  role           Role            @default(SUBSCRIBER)
+  status         Status          @default(ACTIVE)
+  createAt       DateTime        @default(now())
+  updateAt       DateTime        @updatedAt
+  posts          Post[]
+  userPreference UserPreference?
+
+  @@index([email])
+}
+
+model UserPreference {
+  id        String   @id @default(uuid())
+  username  String
+  bio       String   @default("")
+  links     String[]
+  phone     String   @default("")
+  avatarUrl String?
+  address   String   @default("")
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @unique
+  createAt  DateTime @default(now())
+  updateAt  DateTime @updatedAt
+}
+
+model Tag {
+  id   String @id @default(uuid())
+  name String
+  slug String @unique
+  post Post[]
+
+  @@index([name, slug])
+}
+
+model Post {
+  id         String   @id @default(uuid())
+  name       String
+  thumnail   String
+  slug       String   @unique
+  content    String
+  category   Tag      @relation(fields: [categoryId], references: [id])
+  categoryId String
+  author     User     @relation(fields: [authorId], references: [id])
+  authorId   String
+  createAt   DateTime @default(now())
+  updateAt   DateTime @updatedAt
+
+  @@index([name, slug, categoryId, authorId])
+}
+
+model Otp {
+  id       String   @id @default(uuid())
+  code     String
+  type     OtpType
+  verified Boolean  @default(false)
+  email    String
+  expireAt DateTime
+
+  @@unique([code, email])
+  @@index([code, email])
+}
+
+enum Role {
+  ADMIN
+  POSTER
+  SUBSCRIBER
+}
+
+enum Status {
+  ACTIVE
+  BLOCK
+}
+
+enum OtpType {
+  SIGNINUP
+  RESETPASSWORD
+}
