@@ -13,18 +13,13 @@ import { roleAccess } from "../middleware/checkRole";
 
 const router = Router();
 
-router.get(
-  "/",
-  requiredAuth,
-  roleAccess(["ADMIN", "POSTER"]),
-  async (req, res) => {
-    const tags = await prisma.tag.findMany();
-    return res.send({
-      message: "get all tag success",
-      tags,
-    });
-  }
-);
+router.get("/", async (req, res) => {
+  const tags = await prisma.tag.findMany();
+  return res.send({
+    message: "get all tag success",
+    tags,
+  });
+});
 
 router.post(
   "/",

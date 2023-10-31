@@ -1,12 +1,14 @@
 import "express-async-errors";
 import express, { Express, Request, Response, NextFunction } from "express";
 import cors from "cors";
+import morgan from "morgan";
 import router from "./router";
 import { NotFoundError } from "./errors/not-found-error";
 import { CustomError } from "./errors/custom-error";
 import { deserializeUser } from "./middleware/deserializeUser";
 const app: Express = express();
 
+app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

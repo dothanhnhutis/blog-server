@@ -40,7 +40,7 @@ router.post(
         password: hash,
         userPreference: {
           create: {
-            username: email,
+            username: email.split("@")[0] ?? email,
           },
         },
       },
