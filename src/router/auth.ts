@@ -83,6 +83,10 @@ router.post(
           expiresIn: 15 * 24 * 60 * 60,
         }
       );
+      if (user.status === "BLOCK")
+        throw new BadRequestError(
+          "Your account has been locked please contact the administrator"
+        );
       return res.send({
         message: "signin success",
         user: {
