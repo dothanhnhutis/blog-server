@@ -4,7 +4,7 @@ import prisma from "../utils/db";
 type UserAuth = {
   id: string;
   email: string;
-  role: string;
+  role: "ADMIN" | "POSTER" | "SUBSCRIBER";
   status: string;
 };
 

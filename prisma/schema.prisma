@@ -45,19 +45,19 @@ model Tag {
 }
 
 model Post {
-  id         String   @id @default(uuid())
-  name       String
-  thumnail   String
-  slug       String   @unique
-  content    String
-  category   Tag      @relation(fields: [categoryId], references: [id])
-  categoryId String
-  author     User     @relation(fields: [authorId], references: [id])
-  authorId   String
-  createAt   DateTime @default(now())
-  updateAt   DateTime @updatedAt
+  id       String   @id @default(uuid())
+  title    String
+  thumnail String
+  slug     String   @unique
+  content  String
+  tag      Tag      @relation(fields: [tagId], references: [id])
+  tagId    String
+  author   User     @relation(fields: [authorId], references: [id])
+  authorId String
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
 
-  @@index([name, slug, categoryId, authorId])
+  @@index([title, slug, tagId, authorId])
 }
 
 model Otp {
