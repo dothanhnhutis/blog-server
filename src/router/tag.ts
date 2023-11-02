@@ -14,7 +14,15 @@ import { roleAccess } from "../middleware/checkRole";
 const router = Router();
 
 router.get("/", async (req, res) => {
-  const tags = await prisma.tag.findMany();
+  const tags = await prisma.tag.findMany({
+    include: {
+      _count: {
+        select: {
+          post: true,
+        },
+      },
+    },
+  });
   return res.send({
     message: "get all tag success",
     tags,
