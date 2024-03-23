@@ -9,7 +9,6 @@ import {
   editBlogValidation,
   queryBlogValidation,
 } from "../validations/blog.validations";
-import checkCSRF from "../middleware/checkCSRF";
 
 class BlogRoutes {
   routes = Router();
@@ -21,7 +20,7 @@ class BlogRoutes {
     this.routes.patch(
       "/:id",
       requiredAuth,
-      checkCSRF,
+
       checkPermission(["ADMIN", "MANAGER", "WRITER"]),
       validateResource(editBlogValidation),
       this.controller.editBlogById
@@ -29,7 +28,7 @@ class BlogRoutes {
     this.routes.post(
       "/",
       requiredAuth,
-      checkCSRF,
+
       checkPermission(["ADMIN", "MANAGER", "WRITER"]),
       validateResource(createBlogValidation),
       this.controller.createPost

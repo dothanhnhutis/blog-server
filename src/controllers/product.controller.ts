@@ -5,8 +5,7 @@ import {
   QueryProductInput,
 } from "../validations/product.validations";
 import prisma from "../utils/db";
-import { BadRequestError } from "../errors/bad-request-error";
-import { NotFoundError } from "../errors/not-found-error";
+import { BadRequestError, NotFoundError } from "../error-handler";
 import { isBase64DataURL, uploadImageCloudinary } from "../utils/image";
 const QUERY_PRODUCT_TAKE = 12;
 
@@ -15,7 +14,7 @@ class ProductController {
     req: Request<{}, {}, CreateProductInput["body"]>,
     res: Response
   ) {
-    const { id } = res.locals.user!;
+    const { id } = req.currentUser!;
     const { slug, code, categoryId } = req.body;
     const checkSlug = await prisma.product.findUnique({ where: { slug } });
     if (checkSlug) throw new BadRequestError("slug is exist");

@@ -5,7 +5,6 @@ import {
   createProductValidation,
   editProductValidation,
 } from "../validations/product.validations";
-import checkCSRF from "../middleware/checkCSRF";
 import { requiredAuth } from "../middleware/requiredAuth";
 import checkPermission from "../middleware/checkPermission";
 
@@ -21,7 +20,7 @@ class ProductRoutes {
     this.routes.post(
       "/",
       requiredAuth,
-      checkCSRF,
+
       checkPermission(["ADMIN", "MANAGER"]),
       validateResource(createProductValidation),
       this.controller.createProduct
@@ -29,7 +28,7 @@ class ProductRoutes {
     this.routes.patch(
       "/:id",
       requiredAuth,
-      checkCSRF,
+
       checkPermission(["ADMIN", "MANAGER"]),
       validateResource(editProductValidation),
       this.controller.editProduct

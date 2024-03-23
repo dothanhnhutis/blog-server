@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../utils/db";
-import { BadRequestError } from "../errors/bad-request-error";
+import { BadRequestError } from "../error-handler";
 import {
   CreateCategoryInput,
   EditCategoryInput,

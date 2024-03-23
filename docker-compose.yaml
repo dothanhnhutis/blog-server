@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: changeme
       PGDATA: /data/postgres
     volumes:
-      - postgres:/data/postgres
+      - ./docker-volumes/postgres:/var/lib/postgresql
     ports:
       - 5432:5432
     networks:
@@ -20,38 +20,25 @@ services:
     container_name: redis_container
     image: redis:alpine
     restart: always
+    command: redis-server --loglevel warning
     ports:
       - "6379:6379"
     volumes:
-      - redis:/root/redis
-      - redis:/usr/local/etc/redis/redis.conf
-    environment:
-      - REDIS_PASSWORD=my-password
-      - REDIS_PORT=6379
-      - REDIS_DATABASES=16
+      - ./docker-volumes/cache:/data
     networks:
       - app-network
-  # pgadmin:
-  #   container_name: pgadmin_container
-  #   image: dpage/pgadmin4
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
-  #     PGADMIN_DEFAULT_PASSWORD: admin
-  #     PGADMIN_CONFIG_SERVER_MODE: "False"
-  #   volumes:
-  #     - pgadmin:/var/lib/pgadmin
 
-  #   ports:
-  #     - 5050:80
-  #   networks:
-  #     - postgres
-  #   restart: unless-stopped
+  redis-commander:
+    container_name: redis-commander-container
+    image: ghcr.io/joeferner/redis-commander:latest
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    networks:
+      - app-network
 
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  redis:
-  postgres:
-  # pgadmin:

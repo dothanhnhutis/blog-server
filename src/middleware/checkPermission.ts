@@ -1,13 +1,12 @@
 import { RequestHandler as Middleware } from "express";
-import { PermissionError } from "../errors/permission-error";
 import { Role } from "../validations/user.validations";
+import { PermissionError } from "../error-handler";
 
 const checkPermission =
   (roles: Role[]): Middleware =>
   (req, res, next) => {
-    if (!res.locals.user || !roles.includes(res.locals.user.role))
+    if (!req.currentUser || !roles.includes(req.currentUser.role))
       throw new PermissionError();
-
     next();
   };
 export default checkPermission;

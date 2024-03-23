@@ -5,9 +5,8 @@ import {
   QueryBlogInput,
 } from "../validations/blog.validations";
 import prisma from "../utils/db";
-import { BadRequestError } from "../errors/bad-request-error";
 import { isBase64DataURL, uploadImageCloudinary } from "../utils/image";
-import { NotFoundError } from "../errors/not-found-error";
+import { NotFoundError, BadRequestError } from "../error-handler";
 import { Role } from "../validations/user.validations";
 const QUERY_POST_TAKE = 12;
 
@@ -24,7 +23,7 @@ export default class PostController {
     req: Request<EditBlogInput["params"], {}, EditBlogInput["body"]>,
     res: Response
   ) {
-    const { role } = res.locals.user!;
+    const { role } = req.currentUser!;
     const { id } = req.params;
     const { slug, tagId, authorId, thumnail } = req.body;
 
@@ -162,7 +161,7 @@ export default class PostController {
   }
 
   async getAllBlog(req: Request, res: Response) {
-    const { id, role } = res.locals.user!;
+    const { id, role } = req.currentUser!;
     if (role == "ADMIN") {
       const blogs = await prisma.blog.findMany({
         select: {

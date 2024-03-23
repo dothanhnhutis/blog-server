@@ -8,18 +8,18 @@ import {
   QueryUserInput,
   Role,
 } from "../validations/user.validations";
-import { BadRequestError } from "../errors/bad-request-error";
-import { hashData } from "../utils";
+import { BadRequestError, NotFoundError } from "../error-handler";
 import { isBase64DataURL, uploadImageCloudinary } from "../utils/image";
-import { NotFoundError } from "../errors/not-found-error";
+import { omit } from "lodash";
+import { hashData } from "../utils/helper";
 
 export default class UserController {
   async currentUser(req: Request, res: Response) {
     const user = await prisma.user.findUnique({
-      where: { email: res.locals.user?.email },
+      where: { email: req.currentUser?.email },
     });
-    if (user) return res.send(user);
-    return res.send(res.locals.user);
+    if (!user) throw new BadRequestError("User not found");
+    return res.send(omit(user, ["password"]));
   }
   async getUserById(req: Request<GetUserInput["params"]>, res: Response) {
     const { id } = req.params;
@@ -37,7 +37,7 @@ export default class UserController {
     req: Request<{}, {}, EditProfileInput["body"]>,
     res: Response
   ) {
-    const { id } = res.locals.user!;
+    const { id } = req.currentUser!;
     const body = req.body;
     if (body.password) {
       body.password = hashData(body.password);
@@ -58,7 +58,7 @@ export default class UserController {
     res: Response
   ) {
     const { id } = req.params;
-    const { id: currentUserId, role } = res.locals.user!;
+    const { id: currentUserId, role } = req.currentUser!;
 
     const body = req.body;
 
@@ -97,7 +97,7 @@ export default class UserController {
   }
   async getAllUser(req: Request, res: Response) {
     const roles: Role[] = ["ADMIN"];
-    if (res.locals.user?.role == "MANAGER") {
+    if (req.currentUser?.role == "MANAGER") {
       roles.push("MANAGER");
     }
     const users = await prisma.user.findMany({
@@ -122,7 +122,7 @@ export default class UserController {
   }
 
   async getAuthor(req: Request<{}, {}, QueryUserInput["body"]>, res: Response) {
-    const { id, role } = res.locals.user!;
+    const { id, role } = req.currentUser!;
 
     const roles: Role[] = ["WRITER"];
     if (role == "ADMIN") roles.push("MANAGER");
@@ -160,7 +160,7 @@ export default class UserController {
     res: Response
   ) {
     const { email, password, role, ...other } = req.body;
-    const { role: userRole } = res.locals.user!;
+    const { role: userRole } = req.currentUser!;
     const adminRole: Role[] = ["ADMIN", "MANAGER"];
     if (userRole == "MANAGER" && adminRole.includes(role))
       throw new BadRequestError(

@@ -1,12 +1,11 @@
 import { RequestHandler as Middleware } from "express";
-import { NotAuthorizedError } from "../errors/not-authorized-error";
-import { PermissionError } from "../errors/permission-error";
+import { NotAuthorizedError, PermissionError } from "../error-handler";
 
 export const requiredAuth: Middleware = (req, res, next) => {
-  if (!res.locals.user) {
+  if (!req.currentUser) {
     throw new NotAuthorizedError();
   }
-  if (!res.locals.user.isActive) {
+  if (!req.currentUser.isActive) {
     throw new PermissionError();
   }
   next();

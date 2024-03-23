@@ -1,11 +1,12 @@
 import { UploadApiOptions, v2 as cloudinary } from "cloudinary";
-import { BadRequestError } from "../errors/bad-request-error";
+import { BadRequestError } from "../error-handler";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_KEY,
   api_secret: process.env.CLOUDINARY_SECRET,
 });
+
 export function isBase64DataURL(value: string) {
   const base64Regex = /^data:image\/[a-z]+;base64,/;
   return base64Regex.test(value);

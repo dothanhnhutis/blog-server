@@ -9,7 +9,6 @@ import {
 import { requiredAuth } from "../middleware/requiredAuth";
 import checkPermission from "../middleware/checkPermission";
 import TagController from "../controllers/tag.controller";
-import checkCSRF from "../middleware/checkCSRF";
 
 class TagRoutes {
   routes = Router();
@@ -22,7 +21,7 @@ class TagRoutes {
       "/:id",
       validateResource(editTagValidation),
       requiredAuth,
-      checkCSRF,
+
       checkPermission(["ADMIN", "MANAGER"]),
       this.controller.editTag
     );
@@ -30,7 +29,7 @@ class TagRoutes {
       "/:id",
       validateResource(deleteTagValidation),
       requiredAuth,
-      checkCSRF,
+
       checkPermission(["ADMIN", "MANAGER"]),
       this.controller.deleteTag
     );
@@ -43,7 +42,6 @@ class TagRoutes {
       "/",
       validateResource(createTagValidation),
       requiredAuth,
-      checkCSRF,
       checkPermission(["ADMIN", "MANAGER"]),
       this.controller.createTag
     );

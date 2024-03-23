@@ -1,10 +1,10 @@
 import { RequestHandler as Middleware } from "express";
 import { AnyZodObject, ZodError } from "zod";
-import { RequestValidatationError } from "../errors/request-validation-error";
+import { BadRequestError } from "../error-handler";
 
 const validateResource =
   (schema: AnyZodObject): Middleware =>
-  (req, res, next) => {
+  (req, _res, next) => {
     try {
       const data = schema.parse({
         params: req.params,
@@ -16,9 +16,8 @@ const validateResource =
       req.params = data.params;
       next();
     } catch (error: any) {
-      if (error instanceof ZodError) {
-        throw new RequestValidatationError(error);
-      }
+      if (error instanceof ZodError && !error.isEmpty)
+        throw new BadRequestError(error.issues[0].message);
       next(error);
     }
   };

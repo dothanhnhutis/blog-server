@@ -1,10 +1,15 @@
 import express from "express";
-import { UserLocals } from "../validations/user.validations";
 declare global {
   namespace Express {
-    interface Locals {
-      csrf?: string;
-      user: UserLocals | null;
+    interface Request {
+      currentUser?: {
+        id: string;
+        email: string;
+        name: string;
+        avatarUrl: string | null;
+        isActive: boolean;
+        role: Role;
+      };
     }
   }
 }

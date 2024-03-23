@@ -2,7 +2,6 @@ import { Router } from "express";
 import CategoryController from "../controllers/category.controller";
 import validateResource from "../middleware/validateResource";
 import { requiredAuth } from "../middleware/requiredAuth";
-import checkCSRF from "../middleware/checkCSRF";
 import checkPermission from "../middleware/checkPermission";
 import {
   createCategoryValidation,
@@ -22,7 +21,7 @@ class CategoryRoutes {
       "/:id",
       validateResource(editCategoryValidation),
       requiredAuth,
-      checkCSRF,
+
       checkPermission(["ADMIN", "MANAGER"]),
       this.controller.editCategory
     );
@@ -30,7 +29,7 @@ class CategoryRoutes {
       "/:id",
       validateResource(deleteCategoryValidation),
       requiredAuth,
-      checkCSRF,
+
       checkPermission(["ADMIN", "MANAGER"]),
       this.controller.deleteCategory
     );
@@ -43,7 +42,6 @@ class CategoryRoutes {
       "/",
       validateResource(createCategoryValidation),
       requiredAuth,
-      checkCSRF,
       checkPermission(["ADMIN", "MANAGER"]),
       this.controller.createCategory
     );

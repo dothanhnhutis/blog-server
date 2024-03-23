@@ -5,7 +5,7 @@ import {
   EditTagInput,
   GetTagInput,
 } from "../validations/tag.validations";
-import { BadRequestError } from "../errors/bad-request-error";
+import { BadRequestError } from "../error-handler";
 export default class TagController {
   async getAllTag(req: Request, res: Response) {
     const tags = await prisma.tag.findMany({

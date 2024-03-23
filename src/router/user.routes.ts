@@ -9,7 +9,6 @@ import {
   editUserValidation,
   queryUserValidation,
 } from "../validations/user.validations";
-import checkCSRF from "../middleware/checkCSRF";
 
 class UserRoutes {
   routers = Router();
@@ -44,7 +43,7 @@ class UserRoutes {
     this.routers.patch(
       "/:id",
       requiredAuth,
-      checkCSRF,
+
       checkPermission(["ADMIN", "MANAGER"]),
       validateResource(editUserValidation),
       this.controller.edit
@@ -52,14 +51,13 @@ class UserRoutes {
     this.routers.patch(
       "/",
       requiredAuth,
-      checkCSRF,
+
       validateResource(editProfileValidation),
       this.controller.editProfile
     );
     this.routers.post(
       "/",
       requiredAuth,
-      checkCSRF,
       checkPermission(["ADMIN", "MANAGER"]),
       validateResource(createUserValidation),
       this.controller.creatUser

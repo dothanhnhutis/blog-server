@@ -1,6 +1,6 @@
 import { Role } from "@prisma/client";
-import { hashData } from "../src/utils";
 import prisma from "../src/utils/db";
+import { hashData } from "../src/utils/helper";
 
 const tagsData = [
   {

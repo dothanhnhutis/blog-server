@@ -7,15 +7,18 @@ import RedisStore from "connect-redis";
 import { createClient } from "redis";
 
 import routes from "./router";
-import { NotFoundError } from "./errors/not-found-error";
-import { CustomError } from "./errors/custom-error";
+import { IErrorResponse, NotFoundError } from "./error-handler";
+import { CustomError } from "./error-handler";
 import deserializeUser from "./middleware/deserializeUser";
 import helmet from "helmet";
+import { config } from "./config";
+import { StatusCodes } from "http-status-codes";
+
+const SERVER_PORT = 4000;
+const SESSION_MAX_AGE = 1000 * 60 * 60 * 24 * 180;
 
 export default class Server {
   private app: Application;
-  private origin: string = "http://localhost:3000";
-  private sessionMaxAge: number = 1000 * 60 * 60 * 24 * 180;
 
   constructor() {
     this.app = express();
@@ -23,6 +26,7 @@ export default class Server {
   }
 
   private config() {
+    this.app.set("trust proxy", 1);
     const redisClient = createClient();
 
     redisClient.on("error", function (err) {
@@ -37,7 +41,7 @@ export default class Server {
 
     const redisStore = new RedisStore({
       client: redisClient,
-      prefix: "myapp:",
+      prefix: "ich-cookie:",
     });
 
     this.app.use(
@@ -45,13 +49,14 @@ export default class Server {
     );
     this.app.use(
       cors({
-        origin: this.origin,
+        origin: config.CLIENT_URL,
         credentials: true,
+        methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
       })
     );
     this.app.use(helmet());
-    this.app.use(express.json({ limit: "50mb" }));
-    this.app.use(express.urlencoded({ extended: false }));
+    this.app.use(express.json({ limit: "200mb" }));
+    this.app.use(express.urlencoded({ extended: true, limit: "200mb" }));
     this.app.use(
       session({
         name: process.env.SESSION_KEY_NAME ?? "session",
@@ -61,7 +66,7 @@ export default class Server {
         cookie: {
           httpOnly: true,
           secure: process.env.NODE_ENV == "production",
-          maxAge: this.sessionMaxAge,
+          maxAge: SESSION_MAX_AGE,
         },
         store: redisStore,
       })
@@ -78,18 +83,21 @@ export default class Server {
     });
     // handle error
     this.app.use(
-      (error: Error, req: Request, res: Response, next: NextFunction) => {
+      (
+        error: IErrorResponse,
+        req: Request,
+        res: Response,
+        next: NextFunction
+      ) => {
         if (error instanceof CustomError) {
-          return res
-            .status(error.statusCode)
-            .send({ errors: error.serializeErrors() });
+          return res.status(error.statusCode).json(error.serializeErrors());
         }
         console.log(error);
         // req.session.destroy(function (err) {});
         // res.clearCookie("session");
-        return res.status(500).send({
-          errors: [{ message: "Something went wrong" }],
-        });
+        return res
+          .status(StatusCodes.INTERNAL_SERVER_ERROR)
+          .send({ message: "Something went wrong" });
       }
     );
   }
@@ -109,8 +117,8 @@ export default class Server {
     if (!process.env.SESSION_KEY_NAME)
       throw new Error("SESSION_KEY_NAME must be defined");
 
-    this.app.listen(4000, () => {
-      console.log(`Listening on 4000`);
+    this.app.listen(SERVER_PORT, () => {
+      console.log(`Listening on ${SERVER_PORT}`);
     });
   }
 }

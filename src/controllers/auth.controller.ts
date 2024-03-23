@@ -1,16 +1,25 @@
 import { Request, Response } from "express";
 import { SignupInput } from "../validations/auth.validations";
 import prisma from "../utils/db";
-import { BadRequestError } from "../errors/bad-request-error";
-import { compareData, hashData } from "../utils";
 import { signJWT } from "../utils/jwt";
-import { signCSRF } from "../utils/csrf";
+import { omit } from "lodash";
+import { compareData, hashData } from "../utils/helper";
+import { BadRequestError } from "../error-handler";
 
 export default class AuthController {
   async signIn(req: Request, res: Response) {
     const { email, password } = req.body;
     const user = await prisma.user.findUnique({
       where: { email: email },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        name: true,
+        password: true,
+        isActive: true,
+        avatarUrl: true,
+      },
     });
     if (!user) throw new BadRequestError("Invalid email or password");
     if (!user.isActive)
@@ -22,20 +31,11 @@ export default class AuthController {
       throw new BadRequestError("Invalid email or password");
     req.session.user = {
       id: user.id,
-      csrf: signCSRF(),
     };
-    const {
-      createAt,
-      updateAt,
-      bio,
-      password: passwordNew,
-      phone,
-      address,
-      ...other
-    } = user;
+
     return res.send({
-      csrf: req.session.user.csrf,
-      ...other,
+      message: "User signin successfully",
+      user: omit(user, ["password"]),
     });
   }
 

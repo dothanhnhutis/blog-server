@@ -111,12 +111,3 @@ export type CreateUserInput = z.infer<typeof createUserValidation>;
 export type GetUserInput = z.infer<typeof getUserValidation>;
 export type DeleteUserInput = z.infer<typeof deleteUserValidation>;
 export type EditProfileInput = z.infer<typeof editProfileValidation>;
-
-export type UserLocals = {
-  id: string;
-  email: string;
-  name: string;
-  avatarUrl: string | null;
-  isActive: boolean;
-  role: Role;
-};

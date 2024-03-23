@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import { signJWT, verifyJWT } from "../utils/jwt";
 import { OTPCreateUserInput } from "../validations/otp.validations";
 import prisma from "../utils/db";
-import { BadRequestError } from "../errors/bad-request-error";
-import { generateOTPCode } from "../utils";
+import { BadRequestError } from "../error-handler";
 import { sendMail } from "../utils/nodemailer";
+import { generateOTPCode } from "../utils/helper";
 
 export default class OTPController {
   async send(req: Request<{}, {}, OTPCreateUserInput["body"]>, res: Response) {
