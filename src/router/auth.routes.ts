@@ -27,29 +27,3 @@ class AuthRoutes {
   }
 }
 export default new AuthRoutes().routes;
-
-// route.get("/get", (req, res) => {
-//   res.send({
-//     csrf: req.cookies["_csrf"],
-//   });
-// });
-
-// route.get("/set", (req, res) => {
-//   const csrf = signCsrf();
-
-//   res
-//     .cookie("_csrf", csrf, {
-//       secure: false,
-//       httpOnly: true,
-//       sameSite: "none",
-//     })
-//     .send({ csrf });
-// });
-
-// route.get("/delete", (req, res) => {
-//   console.log(verifyCsrf(req.cookies["_csrf"]));
-
-//   res.clearCookie("_csrf").send("ok");
-// });
-
-// export default route;
