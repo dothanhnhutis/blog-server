@@ -29,8 +29,7 @@ export default class UserController {
       },
     });
     if (!user) throw new NotFoundError();
-    const { password, ...userNoPass } = user;
-    return res.send(userNoPass);
+    return res.status(200).json(omit(user, ["password"]));
   }
 
   async editProfile(
@@ -42,29 +41,7 @@ export default class UserController {
     if (body.password) {
       body.password = hashData(body.password);
     }
-    const userUpdate = await prisma.user.update({
-      where: {
-        id,
-      },
-      data: {
-        ...req.body,
-      },
-    });
-    const { password, ...userNoPass } = userUpdate;
-    return res.send({ message: "Edit profile success." });
-  }
-  async edit(
-    req: Request<EditUserInput["params"], {}, EditUserInput["body"]>,
-    res: Response
-  ) {
-    const { id } = req.params;
-    const { id: currentUserId, role } = req.currentUser!;
-
-    const body = req.body;
-
-    if (body.password) {
-      body.password = hashData(body.password);
-    }
+    const { id: currentUserId } = req.currentUser!;
     if (body.avatarUrl) {
       if (isBase64DataURL(body.avatarUrl)) {
         const { asset_id, height, public_id, secure_url, tags, width } =
@@ -83,8 +60,33 @@ export default class UserController {
         body.avatarUrl = secure_url;
       }
     }
+    await prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        ...req.body,
+      },
+    });
+
+    return res.send({
+      message: "Cập nhật thành công",
+    });
+  }
+
+  async edit(
+    req: Request<EditUserInput["params"], {}, EditUserInput["body"]>,
+    res: Response
+  ) {
+    const body = req.body;
+    const { id } = req.params;
+
+    if (body.password) {
+      body.password = hashData(body.password);
+    }
+
     const user = await prisma.user.findUnique({ where: { id } });
-    if (!user) throw new BadRequestError("use not exist");
+    if (!user) throw new BadRequestError("Người dùng không tồn tại");
     await prisma.user.update({
       where: {
         id,
@@ -93,16 +95,15 @@ export default class UserController {
         ...body,
       },
     });
-    return res.send({ message: "Edit user success." });
+    return res.status(200).json({
+      message: "Cập nhật người dùng thành công",
+    });
   }
+
   async getAllUser(req: Request, res: Response) {
-    const roles: Role[] = ["ADMIN"];
-    if (req.currentUser?.role == "MANAGER") {
-      roles.push("MANAGER");
-    }
     const users = await prisma.user.findMany({
       where: {
-        role: { notIn: roles },
+        role: { not: "ADMIN" },
       },
       select: {
         id: true,
@@ -118,15 +119,14 @@ export default class UserController {
         updateAt: true,
       },
     });
-    return res.send(users);
+    return res.status(200).json(users);
   }
 
   async getAuthor(req: Request<{}, {}, QueryUserInput["body"]>, res: Response) {
     const { id, role } = req.currentUser!;
-
     const roles: Role[] = ["WRITER"];
     if (role == "ADMIN") roles.push("MANAGER");
-    const users = await prisma.user.findMany({
+    const authors = await prisma.user.findMany({
       where: {
         OR: [
           { id },
@@ -151,8 +151,7 @@ export default class UserController {
         updateAt: true,
       },
     });
-
-    return res.send(users);
+    return res.status(200).json(authors);
   }
 
   async creatUser(
@@ -160,22 +159,19 @@ export default class UserController {
     res: Response
   ) {
     const { email, password, role, ...other } = req.body;
-    const { role: userRole } = req.currentUser!;
-    const adminRole: Role[] = ["ADMIN", "MANAGER"];
-    if (userRole == "MANAGER" && adminRole.includes(role))
-      throw new BadRequestError(
-        "You are not allowed to place a role higher or equal to yourself"
-      );
+
     const user = await prisma.user.findUnique({ where: { email } });
     if (user) throw new BadRequestError("Email has been used");
     const hashPass = hashData(password);
-    await prisma.user.create({
+    const newUser = await prisma.user.create({
       data: {
         email,
         password: hashPass,
         ...other,
       },
     });
-    return res.send({ message: "Create user success" });
+    return res.status(201).json({
+      message: "Tạo người dùng thành công",
+    });
   }
 }

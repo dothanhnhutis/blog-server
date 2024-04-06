@@ -39,7 +39,9 @@ export default class TagController {
     });
     if (tag) throw new BadRequestError("slug has been used");
     const newTag = await prisma.tag.create({ data: { name, slug } });
-    return res.send(newTag);
+    return res
+      .status(201)
+      .json({ message: "Create tag successful.", tag: newTag });
   }
   async editTag(
     req: Request<EditTagInput["params"], {}, EditTagInput["body"]>,
@@ -65,7 +67,7 @@ export default class TagController {
       data: { ...req.body },
     });
 
-    return res.send(newTag);
+    return res.json({ message: "Edit tag success", tag: newTag });
   }
   async deleteTag(req: Request<EditTagInput["params"]>, res: Response) {
     const { id } = req.params;
@@ -84,6 +86,8 @@ export default class TagController {
     const deleteTag = await prisma.tag.delete({
       where: { id },
     });
-    return res.send(deleteTag);
+    return res
+      .status(200)
+      .json({ message: "Delete tag successful.", tag: deleteTag });
   }
 }

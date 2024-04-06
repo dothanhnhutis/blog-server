@@ -27,16 +27,17 @@ class UserRoutes {
       this.controller.getAuthor
     );
     this.routers.get("/me", requiredAuth, this.controller.currentUser);
+
     this.routers.get(
       "/:id",
       requiredAuth,
-      checkPermission(["ADMIN", "MANAGER"]),
+      checkPermission(["ADMIN"]),
       this.controller.getUserById
     );
     this.routers.get(
       "/",
       requiredAuth,
-      checkPermission(["ADMIN", "MANAGER"]),
+      checkPermission(["ADMIN"]),
       this.controller.getAllUser
     );
 
@@ -44,21 +45,20 @@ class UserRoutes {
       "/:id",
       requiredAuth,
 
-      checkPermission(["ADMIN", "MANAGER"]),
+      checkPermission(["ADMIN"]),
       validateResource(editUserValidation),
       this.controller.edit
     );
     this.routers.patch(
       "/",
       requiredAuth,
-
       validateResource(editProfileValidation),
       this.controller.editProfile
     );
     this.routers.post(
       "/",
       requiredAuth,
-      checkPermission(["ADMIN", "MANAGER"]),
+      checkPermission(["ADMIN"]),
       validateResource(createUserValidation),
       this.controller.creatUser
     );

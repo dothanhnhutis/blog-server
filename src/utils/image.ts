@@ -41,3 +41,28 @@ export async function uploadImageCloudinary(base64: string) {
 export async function deleteImageCloudinary(id: string) {
   await cloudinary.uploader.destroy(id);
 }
+
+// const aws = require('aws-sdk');
+// const multer = require('multer');
+// const multerS3 = require('multer-s3');
+
+// const s3 = new aws.S3({
+//   accessKeyId: 'access_key_id',
+//   secretAccessKey: 'secret_access_key',
+//   region: '<your_region>'
+// });
+
+// const fileUploader = multer({
+//   storage: multerS3({
+//     s3: s3,
+//     bucket: '<your_bucket_name>',
+//     acl: 'public-read',
+//     metadata: function (req, file, cb) {
+
+//       cb(null, {fieldName: file.fieldname});
+//     },
+//     key: function (req, file, cb) {
+//       cb(null, Date.now().toString())
+//     }
+//   })
+// });

@@ -5,7 +5,6 @@ import { signJWT } from "../utils/jwt";
 import { omit } from "lodash";
 import { compareData, hashData } from "../utils/helper";
 import { BadRequestError } from "../error-handler";
-import { NextFunction } from "express-serve-static-core";
 
 export default class AuthController {
   async signIn(req: Request, res: Response) {
