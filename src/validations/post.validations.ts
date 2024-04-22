@@ -4,27 +4,27 @@ const MAX_FILE_SIZE = 5000000;
 export const base64Regex =
   /^data:image\/(?:png|gif|png|jpg|jpeg|bmp|webp)(?:;charset=utf-8)?;base64,(?:[A-Za-z0-9]|[+/])+={0,2}/g;
 
-const blogParams = z.object({
+const postParams = z.object({
   id: z.string(),
 });
 
-const blogBody = z.object({
+const postBody = z.object({
   title: z
     .string({
       required_error: "title field is required",
       invalid_type_error: "title field must be string",
     })
     .min(1, "title field cann't empty"),
-  thumnail: z
+  image: z
     .string({
-      required_error: "thumnail field is required",
-      invalid_type_error: "thumnail field must be url or image base64",
+      required_error: "image field is required",
+      invalid_type_error: "image field must be url or image base64",
     })
     .superRefine((value, ctx) => {
       if (value.length == 0) {
         return ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "thumnail not empty",
+          message: "image not empty",
         });
       }
 
@@ -71,7 +71,7 @@ const blogBody = z.object({
   publishAt: z.string().datetime("invalid date"),
 });
 
-export const getBlogValidation = z.object({
+export const getPostValidation = z.object({
   query: z
     .object({
       title: z.string().optional(),
@@ -81,19 +81,19 @@ export const getBlogValidation = z.object({
     .optional(),
 });
 
-export const createBlogValidation = z.object({
-  body: blogBody.strict(),
+export const createPostValidation = z.object({
+  body: postBody.strict(),
 });
-export const editBlogValidation = z.object({
-  params: blogParams.strict(),
-  body: blogBody.partial().strict(),
-});
-
-export const deleteBlogValidation = z.object({
-  params: blogParams.strict(),
+export const editPostValidation = z.object({
+  params: postParams.strict(),
+  body: postBody.partial().strict(),
 });
 
-export const queryBlogValidation = z.object({
+export const deletePostValidation = z.object({
+  params: postParams.strict(),
+});
+
+export const queryPostValidation = z.object({
   query: z
     .object({
       tag: z.string(),
@@ -103,7 +103,7 @@ export const queryBlogValidation = z.object({
     .partial(),
 });
 
-export type QueryBlogInput = z.infer<typeof queryBlogValidation>;
-export type CreateBlogInput = z.infer<typeof createBlogValidation>;
-export type EditBlogInput = z.infer<typeof editBlogValidation>;
-export type DeleteBlogInput = z.infer<typeof deleteBlogValidation>;
+export type QueryPostInput = z.infer<typeof queryPostValidation>;
+export type CreatePostInput = z.infer<typeof createPostValidation>;
+export type EditPostInput = z.infer<typeof editPostValidation>;
+export type DeletePostInput = z.infer<typeof deletePostValidation>;

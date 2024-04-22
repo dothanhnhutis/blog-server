@@ -39,44 +39,44 @@ export default class AuthController {
     });
   }
 
-  async signUp(req: Request<{}, {}, SignupInput["body"]>, res: Response) {
-    const { email, password, code, name } = req.body;
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
-    if (user) throw new BadRequestError("Uer already exists");
-    const otp = await prisma.otp.findFirst({
-      where: {
-        verified: false,
-        code: signJWT(code, process.env.JWT_SECRET!),
-        email,
-      },
-    });
-    if (!otp) throw new BadRequestError("Email verification code has expired");
+  // async signUp(req: Request<{}, {}, SignupInput["body"]>, res: Response) {
+  //   const { email, password, code, name } = req.body;
+  //   const user = await prisma.user.findUnique({
+  //     where: { email },
+  //   });
+  //   if (user) throw new BadRequestError("Uer already exists");
+  //   const otp = await prisma.otp.findFirst({
+  //     where: {
+  //       verified: false,
+  //       code: signJWT(code, process.env.JWT_SECRET!),
+  //       email,
+  //     },
+  //   });
+  //   if (!otp) throw new BadRequestError("Email verification code has expired");
 
-    const hash = hashData(password);
-    await prisma.user.create({
-      data: {
-        email: email,
-        password: hash,
-        name,
-      },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        isActive: true,
-        name: true,
-      },
-    });
-    await prisma.otp.update({
-      where: { id: otp.id },
-      data: {
-        verified: true,
-      },
-    });
-    return res.send({ message: "Sign up success" });
-  }
+  //   const hash = hashData(password);
+  //   await prisma.user.create({
+  //     data: {
+  //       email: email,
+  //       password: hash,
+  //       name,
+  //     },
+  //     select: {
+  //       id: true,
+  //       email: true,
+  //       role: true,
+  //       isActive: true,
+  //       name: true,
+  //     },
+  //   });
+  //   await prisma.otp.update({
+  //     where: { id: otp.id },
+  //     data: {
+  //       verified: true,
+  //     },
+  //   });
+  //   return res.send({ message: "Sign up success" });
+  // }
 
   async signOut(req: Request, res: Response) {
     req.session.destroy(function (err) {});

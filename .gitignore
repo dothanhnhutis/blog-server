@@ -2,3 +2,4 @@
 .env
 /prisma/migrations
 .DS_Store
+docker-volumes

@@ -12,7 +12,7 @@ export default class TagController {
       include: {
         _count: {
           select: {
-            blog: true,
+            post: true,
           },
         },
       },
@@ -25,7 +25,7 @@ export default class TagController {
       include: {
         _count: {
           select: {
-            blog: true,
+            post: true,
           },
         },
       },
@@ -37,11 +37,9 @@ export default class TagController {
     const tag = await prisma.tag.findUnique({
       where: { slug: slug },
     });
-    if (tag) throw new BadRequestError("slug has been used");
+    if (tag) throw new BadRequestError("slug đã được sử dụng");
     const newTag = await prisma.tag.create({ data: { name, slug } });
-    return res
-      .status(201)
-      .json({ message: "Create tag successful.", tag: newTag });
+    return res.status(201).json({ message: "Tạo tag thành công", tag: newTag });
   }
   async editTag(
     req: Request<EditTagInput["params"], {}, EditTagInput["body"]>,
@@ -53,13 +51,13 @@ export default class TagController {
     const tagExist = await prisma.tag.findUnique({
       where: { id },
     });
-    if (!tagExist) throw new BadRequestError("tag not exist");
+    if (!tagExist) throw new BadRequestError("Tag không tồn tại");
 
     if (slug && slug !== tagExist.slug) {
       const slugExist = await prisma.tag.findUnique({
         where: { slug },
       });
-      if (slugExist) throw new BadRequestError("slug has been used");
+      if (slugExist) throw new BadRequestError("slug đã được sử dụng");
     }
 
     const newTag = await prisma.tag.update({
@@ -67,7 +65,7 @@ export default class TagController {
       data: { ...req.body },
     });
 
-    return res.json({ message: "Edit tag success", tag: newTag });
+    return res.json({ message: "Sửa tag thành công", tag: newTag });
   }
   async deleteTag(req: Request<EditTagInput["params"]>, res: Response) {
     const { id } = req.params;
@@ -76,18 +74,18 @@ export default class TagController {
       include: {
         _count: {
           select: {
-            blog: true,
+            post: true,
           },
         },
       },
     });
-    if (!tag) throw new BadRequestError("slug not exist");
-    if (tag._count.blog > 0) throw new BadRequestError("tag has been used");
+    if (!tag) throw new BadRequestError("slug không tồn tại");
+    if (tag._count.post > 0) throw new BadRequestError("tag đang được sử dụng");
     const deleteTag = await prisma.tag.delete({
       where: { id },
     });
     return res
       .status(200)
-      .json({ message: "Delete tag successful.", tag: deleteTag });
+      .json({ message: "Xoá tag thành công", tag: deleteTag });
   }
 }

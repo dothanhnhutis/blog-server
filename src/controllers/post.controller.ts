@@ -1,12 +1,16 @@
 import { Response, Request } from "express";
 import {
-  CreateBlogInput,
-  EditBlogInput,
-  QueryBlogInput,
-} from "../validations/blog.validations";
+  CreatePostInput,
+  EditPostInput,
+  QueryPostInput,
+} from "../validations/post.validations";
 import prisma from "../utils/db";
 import { isBase64DataURL, uploadImageCloudinary } from "../utils/image";
-import { NotFoundError, BadRequestError } from "../error-handler";
+import {
+  NotFoundError,
+  BadRequestError,
+  PermissionError,
+} from "../error-handler";
 import { Role } from "../validations/user.validations";
 const QUERY_POST_TAKE = 12;
 
@@ -19,27 +23,27 @@ export default class PostController {
   //   return res.send(blog);
   // }
 
-  async editBlogById(
-    req: Request<EditBlogInput["params"], {}, EditBlogInput["body"]>,
+  async editPostById(
+    req: Request<EditPostInput["params"], {}, EditPostInput["body"]>,
     res: Response
   ) {
     const { role } = req.currentUser!;
     const { id } = req.params;
-    const { slug, tagId, authorId, thumnail } = req.body;
+    const { slug, tagId, authorId, image } = req.body;
 
-    const existBlog = await prisma.blog.findUnique({ where: { id } });
-    if (!existBlog) throw new BadRequestError("Blog not found");
+    const existPost = await prisma.post.findUnique({ where: { id } });
+    if (!existPost) throw new BadRequestError("Bài viết không tồn tại");
 
     if (slug) {
-      const slugExist = await prisma.blog.findFirst({
+      const slugExist = await prisma.post.findFirst({
         where: { slug: slug, id: { not: id } },
       });
-      if (slugExist) throw new BadRequestError("Slug has been used");
+      if (slugExist) throw new BadRequestError("Slug đã được sử dụng");
     }
 
     if (tagId) {
       const tagExist = await prisma.tag.findUnique({ where: { id: tagId } });
-      if (!tagExist) throw new BadRequestError("Tagid invalid");
+      if (!tagExist) throw new BadRequestError("Tag không tồn tại");
     }
 
     if (authorId) {
@@ -47,57 +51,56 @@ export default class PostController {
       const authorExist = await prisma.user.findUnique({
         where: { id: authorId },
       });
-      if (!authorExist) throw new BadRequestError("authorId invalid");
-      if (role == "MANAGER" && authorExist.role == "ADMIN")
-        throw new BadRequestError(
-          "You do not have the right to edit the author for someone with higher authority than you"
-        );
-      if (!roles.includes(authorExist.role))
-        throw new BadRequestError("Author not permission");
+      if (!authorExist) throw new BadRequestError("Author không tồn tại");
+      if (
+        !roles.includes(authorExist.role) ||
+        (role == "MANAGER" && authorExist.role == "ADMIN")
+      )
+        throw new PermissionError();
     }
 
-    if (thumnail && isBase64DataURL(thumnail)) {
-      const { secure_url } = await uploadImageCloudinary(thumnail);
-      req.body.thumnail = secure_url;
+    if (image && isBase64DataURL(image)) {
+      const { secure_url } = await uploadImageCloudinary(image);
+      req.body.image = secure_url;
     }
 
-    await prisma.blog.update({
+    await prisma.post.update({
       where: { id },
       data: req.body,
     });
-    return res.send({ message: "Edit blog success" });
+    return res.send({ message: "Sửa bài viết thành công" });
   }
 
   async createPost(
-    req: Request<{}, {}, CreateBlogInput["body"]>,
+    req: Request<{}, {}, CreatePostInput["body"]>,
     res: Response
   ) {
-    const { slug, tagId, authorId, thumnail } = req.body;
+    const { slug, tagId, authorId, image } = req.body;
 
-    const slugExist = await prisma.blog.findUnique({ where: { slug } });
-    if (slugExist) throw new BadRequestError("slug has been used");
+    const slugExist = await prisma.post.findUnique({ where: { slug } });
+    if (slugExist) throw new BadRequestError("Slug đã được sử dụng");
 
     const tagExist = await prisma.tag.findUnique({ where: { id: tagId } });
-    if (!tagExist) throw new BadRequestError("tagId invalid");
+    if (!tagExist) throw new BadRequestError("Tag không tồn tại");
 
     const authorExist = await prisma.user.findUnique({
       where: { id: authorId },
     });
 
-    if (isBase64DataURL(thumnail)) {
-      const { secure_url } = await uploadImageCloudinary(thumnail);
-      req.body.thumnail = secure_url;
+    if (isBase64DataURL(image)) {
+      const { secure_url } = await uploadImageCloudinary(image);
+      req.body.image = secure_url;
     }
 
-    if (!authorExist) throw new BadRequestError("authorId invalid");
+    if (!authorExist) throw new BadRequestError("Author không tồn tại");
 
-    await prisma.blog.create({ data: req.body });
+    await prisma.post.create({ data: req.body });
 
-    return res.status(201).send({ message: "Create blog success" });
+    return res.status(201).send({ message: "Tạo bài viết thành công" });
   }
 
   async queryBlog(
-    req: Request<{}, {}, {}, QueryBlogInput["query"]>,
+    req: Request<{}, {}, {}, QueryPostInput["query"]>,
     res: Response
   ) {
     const { page, tag } = req.query;
@@ -105,7 +108,7 @@ export default class PostController {
     const take = QUERY_POST_TAKE;
     const skip = (currPage - 1) * QUERY_POST_TAKE;
 
-    const total = await prisma.blog.count({
+    const total = await prisma.post.count({
       where: {
         tag: { slug: tag },
         isActive: true,
@@ -115,7 +118,7 @@ export default class PostController {
       },
     });
 
-    const blogs = await prisma.blog.findMany({
+    const posts = await prisma.post.findMany({
       where: {
         tag: { slug: tag },
         isActive: true,
@@ -128,7 +131,7 @@ export default class PostController {
       select: {
         id: true,
         slug: true,
-        thumnail: true,
+        image: true,
         title: true,
         publishAt: true,
         contentText: true,
@@ -144,7 +147,7 @@ export default class PostController {
       },
     });
 
-    const blogsRes = blogs.map(({ contentText, ...blog }) => {
+    const postsRes = posts.map(({ contentText, ...blog }) => {
       return {
         ...blog,
         shortContent: contentText.substring(0, 150),
@@ -152,7 +155,7 @@ export default class PostController {
     });
 
     return res.send({
-      blogs: blogsRes,
+      posts: postsRes,
       metadata: {
         hasNextPage: skip + take < total,
         totalPage: Math.ceil(total / take),
@@ -163,10 +166,10 @@ export default class PostController {
   async getAllBlog(req: Request, res: Response) {
     const { id, role } = req.currentUser!;
     if (role == "ADMIN") {
-      const blogs = await prisma.blog.findMany({
+      const posts = await prisma.post.findMany({
         select: {
           id: true,
-          thumnail: true,
+          image: true,
           slug: true,
           title: true,
           tagId: true,
@@ -187,9 +190,9 @@ export default class PostController {
           },
         },
       });
-      return res.send(blogs);
+      return res.send(posts);
     } else if (role == "MANAGER") {
-      const blogs = await prisma.blog.findMany({
+      const posts = await prisma.post.findMany({
         where: {
           OR: [
             {
@@ -206,7 +209,7 @@ export default class PostController {
         },
         select: {
           id: true,
-          thumnail: true,
+          image: true,
           slug: true,
           title: true,
           tagId: true,
@@ -227,9 +230,9 @@ export default class PostController {
           },
         },
       });
-      return res.send(blogs);
+      return res.send(posts);
     } else {
-      const blogs = await prisma.blog.findMany({
+      const posts = await prisma.post.findMany({
         where: {
           author: {
             id,
@@ -238,7 +241,7 @@ export default class PostController {
         select: {
           id: true,
           slug: true,
-          thumnail: true,
+          image: true,
           title: true,
           tagId: true,
           authorId: true,
@@ -258,13 +261,13 @@ export default class PostController {
           },
         },
       });
-      return res.send(blogs);
+      return res.send(posts);
     }
   }
 
   async getBlogByIdOrSlug(req: Request<{ idOrSlug: string }>, res: Response) {
     const { idOrSlug } = req.params;
-    const existBlog = await prisma.blog.findFirst({
+    const existBlog = await prisma.post.findFirst({
       where: { OR: [{ id: idOrSlug }, { slug: idOrSlug }] },
       include: {
         author: {

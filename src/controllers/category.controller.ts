@@ -17,7 +17,7 @@ class CategoryController {
         },
       },
     });
-    return res.send(categories);
+    return res.status(200).json(categories);
   }
   async getCategoryById(
     req: Request<GetCategoryInput["params"]>,
@@ -33,7 +33,7 @@ class CategoryController {
         },
       },
     });
-    return res.send(category);
+    return res.status(200).json(category);
   }
   async createCategory(
     req: Request<{}, {}, CreateCategoryInput["body"]>,
@@ -43,9 +43,12 @@ class CategoryController {
     const category = await prisma.category.findUnique({
       where: { slug: slug },
     });
-    if (category) throw new BadRequestError("slug has been used");
+    if (category) throw new BadRequestError("Slug đã được sử dụng");
     const newCategory = await prisma.category.create({ data: { name, slug } });
-    return res.send(newCategory);
+    return res.status(201).json({
+      message: "Tạo category thành công",
+      category: newCategory,
+    });
   }
   async editCategory(
     req: Request<EditCategoryInput["params"], {}, EditCategoryInput["body"]>,
@@ -57,13 +60,13 @@ class CategoryController {
     const categoryExist = await prisma.category.findUnique({
       where: { id },
     });
-    if (!categoryExist) throw new BadRequestError("category not exist");
+    if (!categoryExist) throw new BadRequestError("Category không tồn tại");
 
     if (slug && slug !== categoryExist.slug) {
       const slugExist = await prisma.category.findUnique({
         where: { slug },
       });
-      if (slugExist) throw new BadRequestError("slug has been used");
+      if (slugExist) throw new BadRequestError("Slug đã được sử dụng");
     }
 
     const newCategory = await prisma.category.update({
@@ -71,7 +74,10 @@ class CategoryController {
       data: { ...req.body },
     });
 
-    return res.send(newCategory);
+    return res.status(200).json({
+      message: "Sửa category thành công",
+      category: newCategory,
+    });
   }
   async deleteCategory(
     req: Request<EditCategoryInput["params"]>,
@@ -86,13 +92,16 @@ class CategoryController {
         },
       },
     });
-    if (!category) throw new BadRequestError("slug not exist");
+    if (!category) throw new BadRequestError("Slug không tồn tại");
     if (category._count.product > 0)
-      throw new BadRequestError("category has been used");
+      throw new BadRequestError("Category đã được sử dụng");
     const deleteCategory = await prisma.category.delete({
       where: { id },
     });
-    return res.send(deleteCategory);
+    return res.status(200).json({
+      message: "Xoá category thành công",
+      category: deleteCategory,
+    });
   }
 }
 

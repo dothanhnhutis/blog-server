@@ -1,16 +1,16 @@
 import { Router } from "express";
-import PostController from "../controllers/blog.controller";
+import PostController from "../controllers/post.controller";
 import { requiredAuth } from "../middleware/requiredAuth";
 import checkPermission from "../middleware/checkPermission";
 import validateResource from "../middleware/validateResource";
 import {
-  createBlogValidation,
-  deleteBlogValidation,
-  editBlogValidation,
-  queryBlogValidation,
-} from "../validations/blog.validations";
+  createPostValidation,
+  deletePostValidation,
+  editPostValidation,
+  queryPostValidation,
+} from "../validations/post.validations";
 
-class BlogRoutes {
+class PostRoutes {
   routes = Router();
   private controller = new PostController();
   constructor() {
@@ -22,20 +22,20 @@ class BlogRoutes {
       requiredAuth,
 
       checkPermission(["ADMIN", "MANAGER", "WRITER"]),
-      validateResource(editBlogValidation),
-      this.controller.editBlogById
+      validateResource(editPostValidation),
+      this.controller.editPostById
     );
     this.routes.post(
       "/",
       requiredAuth,
 
       checkPermission(["ADMIN", "MANAGER", "WRITER"]),
-      validateResource(createBlogValidation),
+      validateResource(createPostValidation),
       this.controller.createPost
     );
     this.routes.get(
       "/query",
-      validateResource(queryBlogValidation),
+      validateResource(queryPostValidation),
       this.controller.queryBlog
     );
     this.routes.get("/:idOrSlug", this.controller.getBlogByIdOrSlug);
@@ -48,4 +48,4 @@ class BlogRoutes {
   }
 }
 
-export default new BlogRoutes().routes;
+export default new PostRoutes().routes;

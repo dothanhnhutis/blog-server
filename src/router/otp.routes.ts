@@ -11,11 +11,11 @@ class OTPRoutes {
     this.intializeRoutes();
   }
   private intializeRoutes() {
-    this.routes.post(
-      "/create-user",
-      validateResource(otpCreateUserValidation),
-      this.controller.send
-    );
+    // this.routes.post(
+    //   "/create-user",
+    //   validateResource(otpCreateUserValidation),
+    //   this.controller.send
+    // );
   }
 }
 

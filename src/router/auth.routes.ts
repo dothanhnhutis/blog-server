@@ -18,11 +18,11 @@ class AuthRoutes {
       validateResource(signinValidation),
       this.controller.signIn
     );
-    this.routes.post(
-      "/signup",
-      validateResource(signupValidation),
-      this.controller.signUp
-    );
+    // this.routes.post(
+    //   "/signup",
+    //   validateResource(signupValidation),
+    //   this.controller.signUp
+    // );
     this.routes.get("/signout", this.controller.signOut);
   }
 }

@@ -20,8 +20,8 @@ const tagsData = [
     slug: "huong-dan",
   },
   {
-    name: "Tin Tức",
-    slug: "tin-tuc",
+    name: "Tuyển Dụng",
+    slug: "tuyen-dung",
   },
 ];
 
@@ -54,9 +54,9 @@ const usersData: {
 
 async function seed() {
   // reset data
-  await prisma.otp.deleteMany();
+  // await prisma.otp.deleteMany();
   await prisma.image.deleteMany();
-  await prisma.blog.deleteMany();
+  await prisma.post.deleteMany();
   await prisma.tag.deleteMany();
   await prisma.product.deleteMany();
   await prisma.user.deleteMany();
@@ -72,63 +72,63 @@ async function seed() {
     },
   });
   await prisma.tag.createMany({ data: tagsData });
-  await prisma.category.createMany({ data: categoriesDate });
-  const user = await prisma.user.findUnique({
-    where: { email: "gaconght001@gmail.com" },
-  });
-  const tag = await prisma.tag.findUnique({ where: { slug: "lam-dep" } });
-  await prisma.blog.create({
-    data: {
-      title: "sss",
-      slug: "sss",
-      thumnail: "",
-      publishAt: "2023-12-19T08:05:22.897Z",
-      authorId: user!.id,
-      tagId: tag!.id,
-      contentText: "",
-      contentJson: JSON.stringify({
-        type: "doc",
-        content: [
-          {
-            type: "paragraph",
-            attrs: {
-              textAlign: "left",
-            },
-          },
-        ],
-      }),
-      contentHTML: "<p></p>",
-    },
-  });
-  const category = await prisma.category.findUnique({
-    where: { slug: "cham-soc-co-the" },
-  });
-  await prisma.product.create({
-    data: {
-      productName: "sss",
-      code: "sss",
-      images: [],
-      description: "",
-      slug: "s-s-s",
-      benefits: ["1", "2", "3"],
-      ingredients: ["4", "5", "6"],
-      createdById: user!.id,
-      categoryId: category!.id,
-      contentText: "",
-      contentJson: JSON.stringify({
-        type: "doc",
-        content: [
-          {
-            type: "paragraph",
-            attrs: {
-              textAlign: "left",
-            },
-          },
-        ],
-      }),
-      contentHTML: "<p></p>",
-    },
-  });
+  // await prisma.category.createMany({ data: categoriesDate });
+  // const user = await prisma.user.findUnique({
+  //   where: { email: "gaconght001@gmail.com" },
+  // });
+  // const tag = await prisma.tag.findUnique({ where: { slug: "lam-dep" } });
+  // await prisma.post.create({
+  //   data: {
+  //     title: "sss",
+  //     slug: "sss",
+  //     image: "",
+  //     publishAt: "2023-12-19T08:05:22.897Z",
+  //     authorId: user!.id,
+  //     tagId: tag!.id,
+  //     contentText: "",
+  //     contentJson: JSON.stringify({
+  //       type: "doc",
+  //       content: [
+  //         {
+  //           type: "paragraph",
+  //           attrs: {
+  //             textAlign: "left",
+  //           },
+  //         },
+  //       ],
+  //     }),
+  //     contentHTML: "<p></p>",
+  //   },
+  // });
+  // const category = await prisma.category.findUnique({
+  //   where: { slug: "cham-soc-co-the" },
+  // });
+  // await prisma.product.create({
+  //   data: {
+  //     productName: "sss",
+  //     code: "sss",
+  //     images: [],
+  //     description: "",
+  //     slug: "s-s-s",
+  //     benefits: ["1", "2", "3"],
+  //     ingredients: ["4", "5", "6"],
+  //     createdById: user!.id,
+  //     categoryId: category!.id,
+  //     contentText: "",
+  //     contentJson: JSON.stringify({
+  //       type: "doc",
+  //       content: [
+  //         {
+  //           type: "paragraph",
+  //           attrs: {
+  //             textAlign: "left",
+  //           },
+  //         },
+  //       ],
+  //     }),
+  //     contentHTML: "<p></p>",
+  //   },
+  // });
 }
 
 seed();

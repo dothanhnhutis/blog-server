@@ -34,10 +34,12 @@ class ProductController {
     }
     req.body.images = imagesUrl;
 
-    await prisma.product.create({
+    const newProduct = await prisma.product.create({
       data: { ...req.body, createdById: id },
     });
-    return res.send({ message: "create product success" });
+    return res
+      .status(201)
+      .json({ message: "Tạo sản phẩm thành công", product: newProduct });
   }
 
   async getProductByIdOrSlug(
@@ -57,7 +59,7 @@ class ProductController {
       },
     });
     if (!existBlog) throw new NotFoundError();
-    return res.send(existBlog);
+    return res.status(200).json(existBlog);
   }
 
   async getAllProduct(req: Request, res: Response) {
@@ -86,7 +88,7 @@ class ProductController {
       },
     });
 
-    return res.send(blogs);
+    return res.status(200).json(blogs);
   }
 
   async queryProduct(
@@ -125,7 +127,7 @@ class ProductController {
         },
       },
       orderBy: {
-        createAt: "desc",
+        createdAt: "desc",
       },
     });
 
@@ -137,7 +139,7 @@ class ProductController {
       };
     });
 
-    return res.send({
+    return res.status(200).json({
       products: productsRes,
       metadata: {
         hasNextPage: skip + take < total,
@@ -153,27 +155,27 @@ class ProductController {
     const { id } = req.params;
     const data = req.body;
     const productExist = await prisma.product.findUnique({ where: { id } });
-    if (!productExist) throw new BadRequestError("Product not found");
+    if (!productExist) throw new BadRequestError("Sản phẩm không tìm thấy");
 
     if (data.slug) {
       const slugExist = await prisma.product.findFirst({
         where: { slug: data.slug, id: { not: id } },
       });
-      if (slugExist) throw new BadRequestError("Slug has been used");
+      if (slugExist) throw new BadRequestError("Slug đã được sử dụng");
     }
 
     if (data.code) {
       const slugExist = await prisma.product.findFirst({
         where: { slug: data.code, id: { not: id } },
       });
-      if (slugExist) throw new BadRequestError("Code has been used");
+      if (slugExist) throw new BadRequestError("Code đã được sử dụng");
     }
 
     if (data.categoryId) {
       const tagExist = await prisma.category.findUnique({
         where: { id: data.categoryId },
       });
-      if (!tagExist) throw new BadRequestError("Category not exist");
+      if (!tagExist) throw new BadRequestError("Category không tồn tại");
     }
 
     if (data.images) {
@@ -187,11 +189,13 @@ class ProductController {
       data.images = imagesUrl;
     }
 
-    await prisma.product.update({
+    const newProduct = await prisma.product.update({
       where: { id },
       data,
     });
-    return res.send({ message: "Edit product success" });
+    return res
+      .status(200)
+      .json({ message: "Sửa sản phẩm thành công", product: newProduct });
   }
 }
 

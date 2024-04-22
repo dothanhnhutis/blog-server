@@ -115,8 +115,8 @@ export default class UserController {
         phone: true,
         avatarUrl: true,
         address: true,
-        createAt: true,
-        updateAt: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
     return res.status(200).json(users);
@@ -147,8 +147,8 @@ export default class UserController {
         phone: true,
         avatarUrl: true,
         address: true,
-        createAt: true,
-        updateAt: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
     return res.status(200).json(authors);
