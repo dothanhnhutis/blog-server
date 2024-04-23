@@ -6,7 +6,7 @@ import {
 } from "../validations/product.validations";
 import prisma from "../utils/db";
 import { BadRequestError, NotFoundError } from "../error-handler";
-import { isBase64DataURL, uploadImageCloudinary } from "../utils/image";
+import { isBase64DataURL, isUrl, uploadImageCloudinary } from "../utils/image";
 const QUERY_PRODUCT_TAKE = 12;
 
 class ProductController {
@@ -184,6 +184,8 @@ class ProductController {
         if (isBase64DataURL(image)) {
           const { secure_url } = await uploadImageCloudinary(image);
           imagesUrl.push(secure_url);
+        } else if (isUrl(image)) {
+          imagesUrl.push(image);
         }
       }
       data.images = imagesUrl;

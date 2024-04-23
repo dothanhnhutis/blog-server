@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isBase64DataURL } from "../utils/image";
+import { isBase64DataURL, isUrl } from "../utils/image";
 
 const createProductBody = z.object({
   images: z
@@ -10,11 +10,11 @@ const createProductBody = z.object({
     .array()
     .superRefine((value, ctx) => {
       for (let index in value) {
-        if (!isBase64DataURL(value[index])) {
+        if (!isBase64DataURL(value[index]) && !isUrl(value[index])) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ["images", index],
-            message: "images field must be array image base64",
+            message: "images field must be array image base64 or url",
           });
         }
       }

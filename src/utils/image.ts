@@ -12,6 +12,12 @@ export function isBase64DataURL(value: string) {
   return base64Regex.test(value);
 }
 
+export function isUrl(value: string) {
+  const url =
+    /[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/;
+  return url.test(value);
+}
+
 export async function getAllImageCloudinary() {
   const images = await cloudinary.search
     .expression("folder:ich/*")
