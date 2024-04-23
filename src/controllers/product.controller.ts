@@ -7,7 +7,7 @@ import {
 import prisma from "../utils/db";
 import { BadRequestError, NotFoundError } from "../error-handler";
 import { isBase64DataURL, isUrl, uploadImageCloudinary } from "../utils/image";
-const QUERY_PRODUCT_TAKE = 12;
+const QUERY_PRODUCT_TAKE: number = 12;
 
 class ProductController {
   async createProduct(
@@ -95,9 +95,9 @@ class ProductController {
     req: Request<{}, {}, {}, QueryProductInput["query"]>,
     res: Response
   ) {
-    const { page, category } = req.query;
+    const { page, category, limit } = req.query;
     const currPage = parseInt(page ?? "1");
-    const take = QUERY_PRODUCT_TAKE;
+    const take = limit ? parseInt(limit) : QUERY_PRODUCT_TAKE;
     const skip = (currPage - 1) * take;
 
     const total = await prisma.product.count({
@@ -134,7 +134,7 @@ class ProductController {
     const productsRes = products.map(({ contentText, images, ...blog }) => {
       return {
         ...blog,
-        thumnail: images[0],
+        image: images[0],
         shortContent: contentText.substring(0, 150),
       };
     });

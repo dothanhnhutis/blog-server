@@ -53,6 +53,7 @@ export const editProductValidation = z.object({
 export const queryProductValidation = z.object({
   query: z
     .object({
+      limit: z.string(),
       category: z.string(),
       page: z.string(),
     })

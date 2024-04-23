@@ -4,12 +4,16 @@ import { hashData } from "../src/utils/helper";
 
 const tagsData = [
   {
+    name: "Gia Công",
+    slug: "gia-cong",
+  },
+  {
     name: "Làm Đẹp",
     slug: "lam-dep",
   },
   {
-    name: "Gia Công",
-    slug: "gia-cong",
+    name: "Tuyển Dụng",
+    slug: "tuyen-dung",
   },
   {
     name: "Kiến Thức Kinh Doanh",
@@ -19,20 +23,36 @@ const tagsData = [
     name: "Hướng Dẫn",
     slug: "huong-dan",
   },
-  {
-    name: "Tuyển Dụng",
-    slug: "tuyen-dung",
-  },
 ];
 
 const categoriesDate = [
   {
-    name: "chăm sóc cơ thể",
-    slug: "cham-soc-co-the",
+    name: "Chăm Sóc Body",
+    slug: "cham-soc-body",
   },
   {
-    name: "chăm sóc da",
+    name: "Chăm Sóc Cá Nhân",
+    slug: "cham-soc-ca-nhan",
+  },
+  {
+    name: "Chăm Sóc Da",
     slug: "cham-soc-da",
+  },
+  {
+    name: "Chăm Sóc Tóc",
+    slug: "cham-soc-toc",
+  },
+  {
+    name: "Chăm Sóc Gia Đình",
+    slug: "cham-soc-gia-dinh",
+  },
+  {
+    name: "Nước Hoa",
+    slug: "nuoc-hoa",
+  },
+  {
+    name: "Trang Điểm",
+    slug: "trang-diem",
   },
 ];
 
@@ -72,7 +92,7 @@ async function seed() {
     },
   });
   await prisma.tag.createMany({ data: tagsData });
-  // await prisma.category.createMany({ data: categoriesDate });
+  await prisma.category.createMany({ data: categoriesDate });
   // const user = await prisma.user.findUnique({
   //   where: { email: "gaconght001@gmail.com" },
   // });
