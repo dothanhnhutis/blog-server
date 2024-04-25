@@ -20,7 +20,6 @@ class ProductRoutes {
     this.routes.post(
       "/",
       requiredAuth,
-
       checkPermission(["ADMIN", "MANAGER"]),
       validateResource(createProductValidation),
       this.controller.createProduct
@@ -28,7 +27,6 @@ class ProductRoutes {
     this.routes.patch(
       "/:id",
       requiredAuth,
-
       checkPermission(["ADMIN", "MANAGER"]),
       validateResource(editProductValidation),
       this.controller.editProduct
