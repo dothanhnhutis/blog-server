@@ -1,23 +1,26 @@
 import "express-async-errors";
+import http from "http";
 import express, { Request, Response, NextFunction, Application } from "express";
 import cors from "cors";
 import morgan from "morgan";
 import session from "express-session";
 import RedisStore from "connect-redis";
 import { createClient } from "redis";
-
+import { Cluster } from "ioredis";
+import { Server } from "socket.io";
+import { createAdapter } from "@socket.io/redis-adapter";
 import routes from "./router";
 import { IErrorResponse, NotFoundError } from "./error-handler";
 import { CustomError } from "./error-handler";
 import deserializeUser from "./middleware/deserializeUser";
 import helmet from "helmet";
-import { config } from "./config";
+import configs from "./configs";
 import { StatusCodes } from "http-status-codes";
 
 const SERVER_PORT = 4000;
 const SESSION_MAX_AGE = 1000 * 60 * 60 * 24 * 180;
 
-export default class Server {
+export default class AppServer {
   private app: Application;
 
   constructor() {
@@ -49,7 +52,7 @@ export default class Server {
     );
     this.app.use(
       cors({
-        origin: config.CLIENT_URL,
+        origin: configs.CLIENT_URL,
         credentials: true,
         methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
       })
@@ -102,23 +105,41 @@ export default class Server {
     );
   }
 
-  start() {
-    if (!process.env.DATABASE_URL)
-      throw new Error("DATABASE_URL must be defined");
-    if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET must be defined");
-    if (!process.env.GOOGLE_CLIENT_ID)
-      throw new Error("GOOGLE_CLIENT_ID must be defined");
-    if (!process.env.GOOGLE_CLIENT_SECRET)
-      throw new Error("GOOGLE_CLIENT_SECRET must be defined");
-    if (!process.env.GOOGLE_REDIRECT_URI)
-      throw new Error("GOOGLE_REDIRECT_URI must be defined");
-    if (!process.env.GOOGLE_REFRESH_TOKEN)
-      throw new Error("GOOGLE_REFRESH_TOKEN must be defined");
-    if (!process.env.SESSION_KEY_NAME)
-      throw new Error("SESSION_KEY_NAME must be defined");
+  private async startServer(app: Application) {
+    try {
+      const httpServer: http.Server = new http.Server(app);
+      const socketIO: Server = await this.createSocketIO(httpServer);
 
-    this.app.listen(SERVER_PORT, () => {
-      console.log(`Listening on ${SERVER_PORT}`);
+      this.startHttpServer(httpServer);
+    } catch (error) {
+      console.log("GatewayService startServer() error method:", error);
+    }
+  }
+  private async createSocketIO(httpServer: http.Server): Promise<Server> {
+    const io: Server = new Server(httpServer, {
+      cors: {
+        origin: `${configs.CLIENT_URL}`,
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      },
     });
+    const pubClient = createClient({ url: configs.REDIS_HOST });
+    const subClient = pubClient.duplicate();
+    io.adapter(createAdapter(pubClient, subClient));
+    return io;
+  }
+
+  private startHttpServer(httpServer: http.Server) {
+    try {
+      console.log(`App server has started with process id ${process.pid}`);
+      httpServer.listen(SERVER_PORT, () => {
+        console.log(`App server running on port ${SERVER_PORT}`);
+      });
+    } catch (error) {
+      console.log("AppService startServer() method error:", error);
+    }
+  }
+
+  start() {
+    this.startServer(this.app);
   }
 }
