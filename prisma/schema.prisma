@@ -7,41 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// LogOrder Model
-// model LogOrder {
-//   id       String   @id @default(cuid())
-//   data     Json
-//   orderId  String
-//   tags     String[]
-//   order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-//   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   userId   String
-//   createdAt DateTime @default(now())
-// }
+model Contact {
+  id          String   @id @default(cuid())
+  sessionId   String
+  name        String
+  email       String   @default("")
+  phone       String
+  productName String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
 
-// enum TypeBooking {
-//   PACKAGING
-//   CHEMICALS
-// }
-
-// enum StatusEnum {
-//   CREATE
-//   SHIPPING
-//   RECEIVED
-// }
-
-// model Order {
-//   id               String      @id @default(cuid())
-//   name             String
-//   type             TypeBooking
-//   unit             UnitBooking
-//   amount           BigInt
-//   status           StatusEnum
-//   log              LogOrder[]
-//   expectDeliveryAt DateTime
-//   createdAt         DateTime    @default(now())
-//   updatedAt         DateTime    @updatedAt
-// }
+  @@index([sessionId])
+}
 
 model Image {
   id        String   @id
@@ -54,77 +32,6 @@ model Image {
   userId    String
   createdAt DateTime @default(now())
 }
-
-// model Inventory {
-//   id String @id
-// }
-
-// enum Unit {
-//   GRAMS
-//   MILLILITER
-//   BARRELS
-// }
-
-// model Ingredient {
-//   id       String    @id @default(cuid())
-//   name     String
-//   unit     Unit
-//   createdAt DateTime  @default(now())
-//   updatedAt DateTime  @updatedAt
-//   Formula  Formula[]
-// }
-
-// model Formula {
-//   id        String   @id @default(cuid())
-//   name      String
-//   product   Product? @relation(fields: [productId], references: [id])
-//   productId String?
-
-//   createdAt     DateTime @default(now())
-//   updatedAt     DateTime @updatedAt
-// }
-
-model Product {
-  id          String   @id @default(cuid())
-  images      String[]
-  video       String?
-  productName String
-  slug        String   @unique
-  code        String?  @unique
-  description String
-  category    Category @relation(fields: [categoryId], references: [id])
-  categoryId  String
-  benefits    String[]
-  ingredients String[]
-  createdBy   User     @relation(fields: [createdById], references: [id])
-  createdById String
-  contentJson String
-  contentHTML String
-  contentText String
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-// Category Model
-model Category {
-  id        String    @id @default(cuid())
-  name      String
-  slug      String    @unique
-  product   Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  @@index([name, slug])
-}
-
-// Role
-// Admin All
-// Manager blog tag order stock product chemical
-// Accountance stock order product
-// Researcher order product write-chemical
-// Paperworker read-chemical product
-// Writer blog tag
 
 // Role Model
 enum Role {
@@ -190,6 +97,114 @@ model Post {
 
   @@index([title, slug, tagId, authorId])
 }
+
+// Product Model
+model Product {
+  id          String   @id @default(cuid())
+  images      String[]
+  video       String?
+  productName String
+  slug        String   @unique
+  code        String?  @unique
+  description String
+  category    Category @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  benefits    String[]
+  ingredients String[]
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdById String
+  contentJson String
+  contentHTML String
+  contentText String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Category Model
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  product   Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([name, slug])
+}
+
+// LogOrder Model
+// model LogOrder {
+//   id       String   @id @default(cuid())
+//   data     Json
+//   orderId  String
+//   tags     String[]
+//   order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+//   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   userId   String
+//   createdAt DateTime @default(now())
+// }
+
+// enum TypeBooking {
+//   PACKAGING
+//   CHEMICALS
+// }
+
+// enum StatusEnum {
+//   CREATE
+//   SHIPPING
+//   RECEIVED
+// }
+
+// model Order {
+//   id               String      @id @default(cuid())
+//   name             String
+//   type             TypeBooking
+//   unit             UnitBooking
+//   amount           BigInt
+//   status           StatusEnum
+//   log              LogOrder[]
+//   expectDeliveryAt DateTime
+//   createdAt         DateTime    @default(now())
+//   updatedAt         DateTime    @updatedAt
+// }
+
+// model Inventory {
+//   id String @id
+// }
+
+// enum Unit {
+//   GRAMS
+//   MILLILITER
+//   BARRELS
+// }
+
+// model Ingredient {
+//   id       String    @id @default(cuid())
+//   name     String
+//   unit     Unit
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime  @updatedAt
+//   Formula  Formula[]
+// }
+
+// model Formula {
+//   id        String   @id @default(cuid())
+//   name      String
+//   product   Product? @relation(fields: [productId], references: [id])
+//   productId String?
+
+//   createdAt     DateTime @default(now())
+//   updatedAt     DateTime @updatedAt
+// }
+
+// Role
+// Admin All
+// Manager blog tag order stock product chemical
+// Accountance stock order product
+// Researcher order product write-chemical
+// Paperworker read-chemical product
+// Writer blog tag
 
 // model Otp {
 //   id       String   @id @default(cuid())

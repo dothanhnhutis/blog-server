@@ -1,32 +1,21 @@
-import { createClient } from "redis";
 import configs from "../configs";
+import RedisStore from "connect-redis";
+import Redis from "ioredis";
 
-type RedisClient = ReturnType<typeof createClient>;
+export function createRedisStore() {
+  const redisClient = new Redis(configs.REDIS_HOST);
 
-class RedisConnection {
-  client: RedisClient;
+  redisClient.on("error", function (err) {
+    console.log("Could not establish a connection with redis. " + err);
+  });
 
-  constructor() {
-    this.client = createClient({ url: `${configs.REDIS_HOST}` });
-  }
+  redisClient.on("connect", function () {
+    console.log("Connected to redis successfully");
+  });
 
-  async redisConnect(): Promise<void> {
-    try {
-      await this.client.connect();
-      console.log(
-        `GatewayService Redis Connection: ${await this.client.ping()}`
-      );
-      this.cacheError();
-    } catch (error) {
-      console.log("GatewayService redisConnect() method error:", error);
-    }
-  }
-
-  private cacheError(): void {
-    this.client.on("error", (error: unknown) => {
-      console.log(error);
-    });
-  }
+  const redisStore = new RedisStore({
+    client: redisClient,
+    prefix: "ich-cookie:",
+  });
+  return redisStore;
 }
-
-export const redisConnection: RedisConnection = new RedisConnection();

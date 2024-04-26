@@ -4,11 +4,6 @@ import express, { Request, Response, NextFunction, Application } from "express";
 import cors from "cors";
 import morgan from "morgan";
 import session from "express-session";
-import RedisStore from "connect-redis";
-import { createClient } from "redis";
-import { Cluster } from "ioredis";
-import { Server } from "socket.io";
-import { createAdapter } from "@socket.io/redis-adapter";
 import routes from "./router";
 import { IErrorResponse, NotFoundError } from "./error-handler";
 import { CustomError } from "./error-handler";
@@ -16,6 +11,9 @@ import deserializeUser from "./middleware/deserializeUser";
 import helmet from "helmet";
 import configs from "./configs";
 import { StatusCodes } from "http-status-codes";
+import { createRedisStore } from "./redis";
+import compression from "compression";
+import { createSocketIO, socketIOHandler } from "./socket";
 
 const SERVER_PORT = 4000;
 const SESSION_MAX_AGE = 1000 * 60 * 60 * 24 * 180;
@@ -23,43 +21,27 @@ const SESSION_MAX_AGE = 1000 * 60 * 60 * 24 * 180;
 export default class AppServer {
   private app: Application;
 
-  constructor() {
-    this.app = express();
-    this.config();
+  constructor(app: Application) {
+    this.app = app;
   }
 
-  private config() {
-    this.app.set("trust proxy", 1);
-    const redisClient = createClient();
+  public start(): void {
+    this.securityMiddleware(this.app);
+    this.standardMiddleware(this.app);
+    this.routesMiddleware(this.app);
+    this.errorHandler(this.app);
+    this.startServer(this.app);
+  }
 
-    redisClient.on("error", function (err) {
-      console.log("Could not establish a connection with redis. " + err);
-    });
+  private standardMiddleware(app: Application): void {
+    app.use(compression());
+    app.use(express.json({ limit: "200mb" }));
+    app.use(express.urlencoded({ extended: true, limit: "200mb" }));
+  }
 
-    redisClient.on("connect", function (err) {
-      console.log("Connected to redis successfully");
-    });
-
-    redisClient.connect();
-
-    const redisStore = new RedisStore({
-      client: redisClient,
-      prefix: "ich-cookie:",
-    });
-
-    this.app.use(
-      morgan(process.env.NODE_ENV == "production" ? "combined" : "dev")
-    );
-    this.app.use(
-      cors({
-        origin: configs.CLIENT_URL,
-        credentials: true,
-        methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-      })
-    );
-    this.app.use(helmet());
-    this.app.use(express.json({ limit: "200mb" }));
-    this.app.use(express.urlencoded({ extended: true, limit: "200mb" }));
+  private securityMiddleware(app: Application): void {
+    app.set("trust proxy", 1);
+    const redisStore = createRedisStore();
     this.app.use(
       session({
         name: process.env.SESSION_KEY_NAME ?? "session",
@@ -74,21 +56,36 @@ export default class AppServer {
         store: redisStore,
       })
     );
+    this.app.use(
+      morgan(process.env.NODE_ENV == "production" ? "combined" : "dev")
+    );
+    app.use(helmet());
+    this.app.use(
+      cors({
+        origin: configs.CLIENT_URL,
+        credentials: true,
+        methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+      })
+    );
+  }
+
+  private routesMiddleware(app: Application): void {
     // middleware
     this.app.use(deserializeUser);
     // routes
     this.app.use("/api/v1", routes);
+  }
+
+  private errorHandler(app: Application): void {
     // handle 404
-    this.app.use((req, res, next) => {
-      // req.session.destroy(function (err) {});
-      // res.clearCookie("session");
+    app.use("*", (req: Request, res: Response, next: NextFunction) => {
       throw new NotFoundError();
     });
     // handle error
-    this.app.use(
+    app.use(
       (
         error: IErrorResponse,
-        req: Request,
+        _req: Request,
         res: Response,
         next: NextFunction
       ) => {
@@ -108,24 +105,12 @@ export default class AppServer {
   private async startServer(app: Application) {
     try {
       const httpServer: http.Server = new http.Server(app);
-      const socketIO: Server = await this.createSocketIO(httpServer);
-
+      const io = await createSocketIO(httpServer);
+      socketIOHandler(io);
       this.startHttpServer(httpServer);
     } catch (error) {
       console.log("GatewayService startServer() error method:", error);
     }
-  }
-  private async createSocketIO(httpServer: http.Server): Promise<Server> {
-    const io: Server = new Server(httpServer, {
-      cors: {
-        origin: `${configs.CLIENT_URL}`,
-        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      },
-    });
-    const pubClient = createClient({ url: configs.REDIS_HOST });
-    const subClient = pubClient.duplicate();
-    io.adapter(createAdapter(pubClient, subClient));
-    return io;
   }
 
   private startHttpServer(httpServer: http.Server) {
@@ -137,9 +122,5 @@ export default class AppServer {
     } catch (error) {
       console.log("AppService startServer() method error:", error);
     }
-  }
-
-  start() {
-    this.startServer(this.app);
   }
 }

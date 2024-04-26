@@ -5,7 +5,8 @@ import userRoutes from "./user.routes";
 import tagRoutes from "./tag.routes";
 import postRoutes from "./post.routes";
 import productRoutes from "./product.routes";
-import categoruRoutes from "./catorogy.routes";
+import categorRoutes from "./catorogy.routes";
+import contactRoutes from "./contact.routes";
 
 class Routes {
   router = Router();
@@ -16,7 +17,8 @@ class Routes {
     this.router.use("/tags", tagRoutes);
     this.router.use("/posts", postRoutes);
     this.router.use("/products", productRoutes);
-    this.router.use("/categories", categoruRoutes);
+    this.router.use("/categories", categorRoutes);
+    this.router.use("/contacts", contactRoutes);
   }
 }
 
