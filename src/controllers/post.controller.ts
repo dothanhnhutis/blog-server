@@ -68,7 +68,7 @@ export default class PostController {
       where: { id },
       data: req.body,
     });
-    return res.send({ message: "Sửa bài viết thành công" });
+    return res.send({ message: "Cập nhật bài viết thành công" });
   }
 
   async createPost(

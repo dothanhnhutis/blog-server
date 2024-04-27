@@ -75,7 +75,7 @@ class CategoryController {
     });
 
     return res.status(200).json({
-      message: "Sửa category thành công",
+      message: "Cập nhật category thành công",
       category: newCategory,
     });
   }

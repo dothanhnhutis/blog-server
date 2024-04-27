@@ -197,7 +197,7 @@ class ProductController {
     });
     return res
       .status(200)
-      .json({ message: "Sửa sản phẩm thành công", product: newProduct });
+      .json({ message: "Cập nhật sản phẩm thành công", product: newProduct });
   }
 }
 

@@ -11,6 +11,17 @@ export const createContactValidation = z.object({
         required_error: "name field is required",
         invalid_type_error: "name field must be string",
       }),
+      isReaded: z
+        .boolean({
+          invalid_type_error: "isReaded field must be boolean",
+        })
+        .default(false),
+      isDeleted: z
+        .boolean({
+          invalid_type_error: "isDeleted field must be boolean",
+        })
+        .default(false),
+      contactType: z.enum(["BASE", "ARCHIVE", "JUNK"]).default("BASE"),
       email: z
         .string({
           required_error: "email field is required",
@@ -32,8 +43,34 @@ export const createContactValidation = z.object({
     })
     .strict(),
 });
+export const editContactValidation = z.object({
+  params: z.object({
+    id: z.string(),
+  }),
+  body: createContactValidation.shape.body
+    .pick({
+      isReaded: true,
+      contactType: true,
+      isDeleted: true,
+    })
+    .partial()
+    .strict(),
+});
 
+export const queryContactValidation = z.object({
+  query: z
+    .object({
+      isReaded: z.string(),
+      contactType: z.string(),
+      isDeleted: z.string(),
+    })
+    .strip()
+    .partial(),
+});
 export type CreateContact = z.infer<typeof createContactValidation>;
+export type EditContact = z.infer<typeof editContactValidation>;
+export type QueryContact = z.infer<typeof queryContactValidation>;
+
 export type Contact = CreateContact & {
   id: string;
   createdAt: string;

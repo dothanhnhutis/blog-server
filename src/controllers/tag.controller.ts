@@ -65,7 +65,7 @@ export default class TagController {
       data: { ...req.body },
     });
 
-    return res.json({ message: "Sửa tag thành công", tag: newTag });
+    return res.json({ message: "Cập nhật tag thành công", tag: newTag });
   }
   async deleteTag(req: Request<EditTagInput["params"]>, res: Response) {
     const { id } = req.params;
