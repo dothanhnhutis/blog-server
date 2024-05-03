@@ -19,7 +19,8 @@ export default class ContactController {
     const socket = getSocketIO();
     socket.emit("contact", newContact);
     return res.status(201).json({
-      message: "Tạo contact thành công",
+      message:
+        "Cảm ơn bạn đã liên hệ với chúng tôi. Bộ phẩn chăm sóc khách hàng đã nhận được thông tin và sẽ liên hệ lại với bạn trong vòng 24h.",
       contact: newContact,
     });
   }
@@ -28,14 +29,13 @@ export default class ContactController {
     req: Request<{}, {}, {}, QueryContact["query"]>,
     res: Response
   ) {
-    const { isDeleted, isReaded, contactType } = req.query;
+    const { isReaded, contactTag } = req.query;
     const contacts = await prisma.contact.findMany({
       where: {
-        isDeleted: { equals: isDeleted ? isDeleted == "true" : undefined },
         isReaded: { equals: isReaded ? isReaded == "true" : undefined },
-        contactType: {
-          equals: contactType
-            ? (contactType as EditContact["body"]["contactType"])
+        contactTag: {
+          equals: contactTag
+            ? (contactTag as EditContact["body"]["contactTag"])
             : undefined,
         },
       },

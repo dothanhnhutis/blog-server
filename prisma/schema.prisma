@@ -8,25 +8,25 @@ datasource db {
 }
 
 // Role Model
-enum ContactType {
+enum ContactTag {
+  NORMAL
   JUNK
   ARCHIVE
-  BASE
+  TRASH
 }
 
 model Contact {
-  id          String      @id @default(cuid())
+  id          String     @id @default(cuid())
   sessionId   String
   name        String
-  email       String      @default("")
+  email       String     @default("")
   phone       String
-  isReaded    Boolean     @default(false)
-  isDeleted   Boolean     @default(false)
-  contactType ContactType @default(BASE)
+  isReaded    Boolean    @default(false)
+  contactTag  ContactTag @default(NORMAL)
   productName String
   description String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @default(now()) @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
 
   @@index([sessionId])
 }

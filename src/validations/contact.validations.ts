@@ -16,12 +16,9 @@ export const createContactValidation = z.object({
           invalid_type_error: "isReaded field must be boolean",
         })
         .default(false),
-      isDeleted: z
-        .boolean({
-          invalid_type_error: "isDeleted field must be boolean",
-        })
-        .default(false),
-      contactType: z.enum(["BASE", "ARCHIVE", "JUNK"]).default("BASE"),
+      contactTag: z
+        .enum(["NORMAL", "ARCHIVE", "JUNK", "TRASH"])
+        .default("NORMAL"),
       email: z
         .string({
           required_error: "email field is required",
@@ -50,7 +47,7 @@ export const editContactValidation = z.object({
   body: createContactValidation.shape.body
     .pick({
       isReaded: true,
-      contactType: true,
+      contactTag: true,
       isDeleted: true,
     })
     .partial()
@@ -61,7 +58,7 @@ export const queryContactValidation = z.object({
   query: z
     .object({
       isReaded: z.string(),
-      contactType: z.string(),
+      contactTag: z.string(),
       isDeleted: z.string(),
     })
     .strip()
