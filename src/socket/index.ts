@@ -20,6 +20,7 @@ export async function createSocketIO(httpServer: http.Server): Promise<Server> {
 
 export async function socketIOHandler(io: Server) {
   io.on("connection", async (socket: Socket) => {
+    console.log(socket.id);
     console.log("Connected to redis successfully");
   });
 }
