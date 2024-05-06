@@ -1,4 +1,4 @@
 /node_modules
 .env
 /prisma/migrations
-docker-volumes
+docker_volumes

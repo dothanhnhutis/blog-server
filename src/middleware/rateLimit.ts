@@ -8,7 +8,7 @@ export const rateLimitContact = rateLimit({
   standardHeaders: "draft-7",
   legacyHeaders: false,
   keyGenerator: function (req: Request<{}, {}, CreateContact["body"]>) {
-    return req.body.sessionId;
+    return req.body.requestId;
   },
   handler: (req, res, next, options) => {
     console.log(options);

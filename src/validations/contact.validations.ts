@@ -3,9 +3,9 @@ import { z } from "zod";
 export const createContactValidation = z.object({
   body: z
     .object({
-      sessionId: z.string({
-        required_error: "sessionId field is required",
-        invalid_type_error: "sessionId field must be string",
+      requestId: z.string({
+        required_error: "requestId field is required",
+        invalid_type_error: "requestId field must be string",
       }),
       name: z.string({
         required_error: "name field is required",
